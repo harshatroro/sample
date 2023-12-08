@@ -7,6 +7,7 @@ import 'package:sample/providers/camera_provider.dart';
 import 'package:sample/providers/camera_service_provider.dart';
 import 'package:sample/providers/connection_service_provider.dart';
 import 'package:sample/providers/google_ml_kit_text_recognition_service_provider.dart';
+import 'package:sample/providers/tesseract_service_provider.dart';
 import 'package:sample/screens/result_screen.dart';
 import 'package:sample/widgets/alert_dialog.dart';
 
@@ -53,9 +54,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                         final connectionService = ref.read(connectionServiceProvider.notifier).state;
                         final connectionResult = await connectionService.checkConnected();
                         if(connectionResult) {
-                          // XFile? capturedImage = await cameraService.takePicture();
-                          File capturedImage = File('lib/IMG_2864.jpg');
-                          final processor = ref.read(googleMLKitTextRecognitionServiceProvider.notifier).state;
+                          XFile? capturedImage = await cameraService.takePicture();
+                          final processor = ref.read(tesseractServiceProvider.notifier).state;
                           final textInImage = await processor.readTextFromImage(capturedImage!.path);
                           setState(() {
                             processing = true;
@@ -65,7 +65,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                           Navigator.push(
                               context,
                               CupertinoPageRoute(
-                                  builder: (context) => ResultScreen(text: "$textInImage")
+                                  builder: (context) => ResultScreen(text: textInImage)
                               )
                           );
                         } else {
