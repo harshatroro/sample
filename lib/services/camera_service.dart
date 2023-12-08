@@ -5,6 +5,7 @@ class CameraService {
   CameraDescription? camera;
   CameraController? cameraController;
   PermissionStatus? cameraPermission;
+  PermissionStatus? microphonePermission;
 
   Future<CameraDescription> getCamera() async {
     List<CameraDescription> cameras = await availableCameras();
@@ -15,17 +16,26 @@ class CameraService {
     return await Permission.camera.status;
   }
 
+  Future<PermissionStatus> getMicrophonePermission() async {
+    return await Permission.microphone.status;
+  }
+
   Future<CameraController?> getCameraController() async {
-    cameraPermission ??= await getCameraPermission();
-    if (cameraPermission! == PermissionStatus.granted) {
+    cameraPermission = await getCameraPermission();
+    microphonePermission = await getMicrophonePermission();
+    if (
+      cameraPermission == PermissionStatus.granted
+      || microphonePermission == PermissionStatus.granted
+    ) {
       camera ??= await getCamera();
       CameraController temporaryController = CameraController(camera!, ResolutionPreset.max);
       await temporaryController.initialize().then((value) => value);
       return temporaryController;
-    } else if (cameraPermission! == PermissionStatus.denied) {
+    } else if (cameraPermission == PermissionStatus.denied) {
       await Permission.camera.request();
+      await Permission.microphone.request();
       return getCameraController();
-    } else if (cameraPermission! == PermissionStatus.permanentlyDenied) {
+    } else if (cameraPermission == PermissionStatus.permanentlyDenied) {
       openAppSettings();
       return null;
     }

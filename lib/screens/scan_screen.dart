@@ -1,12 +1,9 @@
-import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sample/providers/camera_provider.dart';
 import 'package:sample/providers/camera_service_provider.dart';
 import 'package:sample/providers/connection_service_provider.dart';
-import 'package:sample/providers/google_ml_kit_text_recognition_service_provider.dart';
 import 'package:sample/providers/tesseract_service_provider.dart';
 import 'package:sample/screens/result_screen.dart';
 import 'package:sample/widgets/alert_dialog.dart';
@@ -48,9 +45,6 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                       color: processing ? CupertinoColors.inactiveGray : CupertinoColors.activeBlue,
                       onPressed: !processing
                           ? () async {
-                        setState(() {
-                          processing = true;
-                        });
                         final connectionService = ref.read(connectionServiceProvider.notifier).state;
                         final connectionResult = await connectionService.checkConnected();
                         if(connectionResult) {
@@ -62,12 +56,15 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                           });
                           debugPrint("Text Captured: $textInImage");
                           // ignore: use_build_context_synchronously
-                          Navigator.push(
+                          await Navigator.push(
                               context,
                               CupertinoPageRoute(
                                   builder: (context) => ResultScreen(text: textInImage)
                               )
                           );
+                          setState(() {
+                            processing = true;
+                          });
                         } else {
                           setState(() {
                             processing = true;
